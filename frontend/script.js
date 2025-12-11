@@ -1,5 +1,6 @@
 // Updated script.js with sequential ID support and improved functionality
-const API_BASE = 'http://localhost:5000/reservations'; // Changed to direct endpoint for better testing
+// const API_BASE = 'http://localhost:5000/reservations';
+const API_BASE = '/reservations';
 let editMode = false;
 let currentEditId = null;
 

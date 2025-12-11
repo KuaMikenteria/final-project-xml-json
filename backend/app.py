@@ -1,4 +1,4 @@
-# backend/app.py - UPDATED WITH ALL FIXES
+# backend/app.py - UPDATED FOR RAILWAY DEPLOYMENT
 from flask import Flask, request, jsonify, send_from_directory, Response
 from flask_cors import CORS
 import json
@@ -240,10 +240,26 @@ def parse_xml_request(xml_string):
         print(f"XML parsing error: {e}")
         return {}
 
+# Serve static files for frontend
 @app.route('/')
 def serve_frontend():
     """Serve the main frontend page"""
     return send_from_directory(app.static_folder, 'index.html')
+
+@app.route('/<path:path>')
+def serve_static_files(path):
+    """Serve CSS, JS, and other static files"""
+    if path.endswith('.css'):
+        mimetype = 'text/css'
+    elif path.endswith('.js'):
+        mimetype = 'application/javascript'
+    else:
+        mimetype = None
+    
+    try:
+        return send_from_directory(app.static_folder, path, mimetype=mimetype)
+    except:
+        return send_from_directory(app.static_folder, 'index.html')
 
 # ============ API ENDPOINTS ============
 
@@ -435,62 +451,6 @@ def update_reservation(reservation_id):
     
     return jsonify(data), 200
 
-@app.route('/api/reservations/<reservation_id>', methods=['PATCH'])
-@app.route('/reservations/<reservation_id>', methods=['PATCH'])
-def patch_reservation(reservation_id):
-    """PATCH /{id} - Partially update reservation"""
-    reservations = read_reservations()
-
-    # Find the reservation
-    target = None
-    index = None
-    for i, res in enumerate(reservations):
-        if str(res.get("id")) == str(reservation_id):
-            target = res
-            index = i
-            break
-
-    if target is None:
-        return jsonify({"error": f"Reservation {reservation_id} not found"}), 404
-
-    # Detect content type
-    content_type = request.headers.get("Content-Type", "").lower()
-
-    if "xml" in content_type:
-        # Parse XML body
-        xml_body = request.data.decode("utf-8")
-        new_values = parse_xml_request(xml_body)
-    else:
-        # Parse JSON body
-        new_values = request.get_json()
-        if not new_values:
-            return jsonify({"error": "Invalid or empty request body"}), 400
-
-    # Apply partial update
-    for key, value in new_values.items():
-        if key in target:
-            target[key] = value
-
-    # Update timestamp
-    target["updated_at"] = datetime.now().isoformat()
-
-    # Validate after partial update
-    is_valid, error = validate_reservation(target)
-    if not is_valid:
-        return jsonify({"error": error}), 400
-
-    # Save back into file
-    reservations[index] = target
-    save_reservations(reservations)
-
-    # XML response if requested
-    format_type = request.args.get("format", "json").lower()
-    if format_type == "xml":
-        xml_data = json_to_xml(target)
-        return Response(xml_data, mimetype="application/xml")
-
-    return jsonify(target), 200
-
 @app.route('/api/reservations/<reservation_id>', methods=['DELETE'])
 @app.route('/reservations/<reservation_id>', methods=['DELETE'])
 def delete_reservation(reservation_id):
@@ -560,124 +520,26 @@ def health_check():
             'DELETE /reservations/{id}': 'Delete reservation'
         },
         'supported_formats': ['json', 'xml']
-    })
-
-# Test XML endpoint
-@app.route('/test-xml', methods=['GET'])
-def test_xml():
-    """Test endpoint to verify XML format"""
-    test_data = {
-        'id': 1,
-        'guest_name': 'Test User',
-        'email': 'test@example.com',
-        'phone': '09171234567',
-        'street_address': '123 Test Street',
-        'municipality': 'Quezon City',
-        'region': 'NCR',
-        'country': 'Philippines',
-        'resort_name': 'Test Resort',
-        'checkin_date': '2024-12-25',
-        'checkout_date': '2024-12-28',
-        'guests': 2,
-        'payment_gateway': 'GCash',
-        'created_at': datetime.now().isoformat(),
-        'updated_at': datetime.now().isoformat()
-    }
-    
-    xml_data = json_to_xml(test_data)
-    return Response(xml_data, mimetype='application/xml')
-
-# API documentation endpoint
-@app.route('/api-docs', methods=['GET'])
-def api_docs():
-    """API documentation"""
-    return jsonify({
-        'api_name': 'SubiC Resort Reservation API',
-        'version': '1.0.0',
-        'description': 'RESTful API supporting both JSON and XML formats',
-        'base_url': 'http://127.0.0.1:5000',
-        'endpoints': [
-            {
-                'method': 'GET',
-                'path': '/reservations',
-                'description': 'Get all reservations',
-                'parameters': [
-                    {'name': 'format', 'type': 'string', 'values': ['json', 'xml'], 'default': 'json'},
-                    {'name': 'q', 'type': 'string', 'description': 'Search query'}
-                ],
-                'examples': {
-                    'json': 'GET /reservations',
-                    'xml': 'GET /reservations?format=xml'
-                }
-            },
-            {
-                'method': 'POST',
-                'path': '/reservations',
-                'description': 'Create new reservation',
-                'parameters': [
-                    {'name': 'format', 'type': 'string', 'values': ['json', 'xml'], 'default': 'json'}
-                ],
-                'examples': {
-                    'json': 'POST /reservations (with JSON body)',
-                    'xml': 'POST /reservations?format=xml (with XML body, Content-Type: application/xml)'
-                }
-            },
-            {
-                'method': 'GET',
-                'path': '/reservations/{id}',
-                'description': 'Get specific reservation',
-                'parameters': [
-                    {'name': 'format', 'type': 'string', 'values': ['json', 'xml'], 'default': 'json'}
-                ],
-                'examples': {
-                    'json': 'GET /reservations/1',
-                    'xml': 'GET /reservations/1?format=xml'
-                }
-            },
-            {
-                'method': 'PUT',
-                'path': '/reservations/{id}',
-                'description': 'Update reservation',
-                'parameters': [
-                    {'name': 'format', 'type': 'string', 'values': ['json', 'xml'], 'default': 'json'}
-                ]
-            },
-            {
-                'method': 'DELETE',
-                'path': '/reservations/{id}',
-                'description': 'Delete reservation',
-                'parameters': [
-                    {'name': 'format', 'type': 'string', 'values': ['json', 'xml'], 'default': 'json'}
-                ]
-            }
-        ]
-    })
+    }), 200
 
 if __name__ == '__main__':
+    port = int(os.environ.get('PORT', 5000))
+    debug = os.environ.get('FLASK_ENV') == 'development'
+    
     print("=" * 60)
-    print("SubiC Resort Reservation API Server Starting...")
+    print("🏝️  SubiC Resort Reservation API Server Starting...")
     print("=" * 60)
-    print("\n🔗 Frontend Website:")
-    print("   http://127.0.0.1:5000")
+    print(f"\n🌐 Environment: {'Development' if debug else 'Production'}")
+    print(f"🔧 Port: {port}")
+    print(f"🔗 URL: http://0.0.0.0:{port}")
     
-    print("\n🔧 API Endpoints:")
-    print("   GET    http://127.0.0.1:5000/reservations")
-    print("   POST   http://127.0.0.1:5000/reservations")
-    print("   GET    http://127.0.0.1:5000/reservations/{id}")
-    print("   PUT    http://127.0.0.1:5000/reservations/{id}")
-    print("   DELETE http://127.0.0.1:5000/reservations/{id}")
-    
-    print("\n🧪 Test Endpoints:")
-    print("   GET http://127.0.0.1:5000/health")
-    print("   GET http://127.0.0.1:5000/test-xml")
-    print("   GET http://127.0.0.1:5000/api-docs")
-    
+    print("\n📊 Initial Stats:")
     reservations = read_reservations()
-    print(f"\n📊 Current reservations: {len(reservations)}")
-    print(f"📊 Next available ID: {get_next_id()}")
+    print(f"   Reservations: {len(reservations)}")
+    print(f"   Next available ID: {get_next_id()}")
     
     print("\n" + "=" * 60)
     print("✅ Server is ready!")
     print("=" * 60)
     
-    app.run(debug=True, port=5000, host='127.0.0.1')
+    app.run(host='0.0.0.0', port=port, debug=debug)
