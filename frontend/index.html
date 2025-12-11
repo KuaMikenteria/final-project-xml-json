@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏝️ Resort Booking System</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🏝️ Resort Booking System</h1>
+            <p class="subtitle">Book your perfect getaway - Supports JSON & XML APIs</p>
+        </header>
+
+        <div class="two-column">
+            <!-- Left Column - Personal Details -->
+            <div class="card">
+                <h2>📝 Personal Details</h2>
+                <form id="personalForm">
+                    <div class="form-group">
+                        <label for="guest_name">Full Name *</label>
+                        <input type="text" id="guest_name" name="guest_name" required placeholder="Enter your full name">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="email">Email Address *</label>
+                        <input type="email" id="email" name="email" required placeholder="your.email@example.com">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="phone">Phone Number</label>
+                        <input type="tel" id="phone" name="phone" placeholder="09171234567">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="street_address">Street Address</label>
+                        <input type="text" id="street_address" name="street_address" placeholder="123 Main Street">
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="municipality">City</label>
+                            <input type="text" id="municipality" name="municipality" placeholder="Quezon City">
+                        </div>
+                        <div class="form-group">
+                            <label for="region">Region</label>
+                            <input type="text" id="region" name="region" placeholder="NCR">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="country">Country</label>
+                        <input type="text" id="country" name="country" value="Philippines" placeholder="Philippines">
+                    </div>
+                </form>
+            </div>
+
+            <!-- Right Column - Booking Details -->
+            <div class="card">
+                <h2>📅 Booking Details</h2>
+                <form id="bookingForm">
+                    <div class="form-group">
+                        <label for="resort_name">Resort *</label>
+                        <select id="resort_name" name="resort_name" required>
+                            <option value="">Select a resort...</option>
+                            <option value="Arcadia Beach Resort">Arcadia Beach Resort</option>
+                            <option value="Kuya Boy Beach Resort">Kuya Boy Beach Resort</option>
+                            <option value="Blue Horizon Resort">Blue Horizon Resort</option>
+                            <option value="White Sand Paradise">White Sand Paradise</option>
+                            <option value="Mountain View Villa">Mountain View Villa</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="checkin_date">Check-in *</label>
+                            <input type="date" id="checkin_date" name="checkin_date" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="checkout_date">Check-out *</label>
+                            <input type="date" id="checkout_date" name="checkout_date" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="guests">Number of Guests *</label>
+                        <input type="number" id="guests" name="guests" min="1" value="1" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="payment_gateway">Payment Method</label>
+                        <select id="payment_gateway" name="payment_gateway">
+                            <option value="Credit Card">Credit Card</option>
+                            <option value="GCash">GCash</option>
+                            <option value="PayPal">PayPal</option>
+                            <option value="Bank Transfer">Bank Transfer</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="button" id="submitJson" class="btn btn-primary">
+                            📤 Submit as JSON
+                        </button>
+                        <button type="button" id="submitXml" class="btn btn-secondary">
+                            📄 Submit as XML
+                        </button>
+                        <button type="button" id="cancelEdit" class="btn btn-cancel" style="display:none;">
+                            ❌ Cancel Edit
+                        </button>
+                    </div>
+                    
+                    <div class="api-info">
+                        <p><strong>API Format:</strong> <span id="currentFormat">JSON</span></p>
+                        <button type="button" id="toggleFormat" class="btn-small">
+                            Switch to XML
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Dashboard Section -->
+        <div class="dashboard card">
+            <h2>📊 Reservations Dashboard</h2>
+            
+            <div class="dashboard-controls">
+                <div class="search-box">
+                    <input type="text" id="searchInput" placeholder="Search by name, email, or resort...">
+                    <button id="searchBtn" class="btn-small">🔍 Search</button>
+                    <button id="refreshBtn" class="btn-small">🔄 Refresh</button>
+                </div>
+                
+                <div class="api-controls">
+                    <label>API Response Format:</label>
+                    <select id="responseFormat">
+                        <option value="json">JSON</option>
+                        <option value="xml">XML</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="table-container">
+                <table id="reservationsTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Guest</th>
+                            <th>Email</th>
+                            <th>Resort</th>
+                            <th>Check-in</th>
+                            <th>Check-out</th>
+                            <th>Guests</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Data will be loaded here -->
+                    </tbody>
+                </table>
+            </div>
+        
+        <footer>
+            <p>Laboratory Activity Presentation</p>
+        </footer>
+    </div>
+
+    <!-- View Modal -->
+    <div id="viewModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h3>Reservation Details</h3>
+            <pre id="modalDetails"></pre>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

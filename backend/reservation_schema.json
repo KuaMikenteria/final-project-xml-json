@@ -1,0 +1,49 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Resort Reservation",
+  "type": "object",
+  "properties": {
+    "id": { 
+      "oneOf": [
+        { "type": "string" },
+        { "type": "number" }
+      ]
+    },
+    "resort_name": { "type": "string" },
+    "guest_name": { "type": "string", "minLength": 1 },
+    "street_address": { "type": "string" },
+    "municipality": { "type": "string" },
+    "region": { "type": "string" },
+    "country": { "type": "string" },
+    "checkin_date": { "type": "string", "format": "date" },
+    "checkout_date": { "type": "string", "format": "date" },
+    "guests": { "type": "integer", "minimum": 1 },
+    "payment_gateway": { "type": "string" },
+    "contact": {
+      "type": "object",
+      "properties": {
+        "phone": { "type": "string" },
+        "email": { "type": "string", "format": "email" }
+      },
+      "required": ["phone", "email"]
+    },
+    "valid_id": {
+      "type": "object",
+      "properties": {
+        "type": { "type": "string" },
+        "number": { "type": "string" }
+      }
+    },
+    "created_at": { "type": "string", "format": "date-time" },
+    "updated_at": { "type": "string", "format": "date-time" }
+  },
+  "required": [
+    "guest_name",
+    "email",
+    "resort_name",
+    "checkin_date",
+    "checkout_date",
+    "guests"
+  ],
+  "additionalProperties": true
+}
