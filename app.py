@@ -13,8 +13,9 @@ CORS(app)
 
 # File paths
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DATA_FILE = os.path.join(BASE_DIR, 'reservations.json')
-SCHEMA_FILE = os.path.join(BASE_DIR, 'reservation_schema.json')
+DATA_FILE = os.path.join(BASE_DIR, 'backend/reservations.json')
+SCHEMA_FILE = os.path.join(BASE_DIR, 'backend/reservation_schema.json')
+app = Flask(__name__, static_folder='frontend', static_url_path='')
 
 # Ensure data file exists
 if not os.path.exists(DATA_FILE):
