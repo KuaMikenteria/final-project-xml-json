@@ -3,39 +3,92 @@
   "title": "Resort Reservation",
   "type": "object",
   "properties": {
-    "id": { 
+    "id": {
       "oneOf": [
         { "type": "string" },
         { "type": "number" }
       ]
     },
-    "resort_name": { "type": "string" },
-    "guest_name": { "type": "string", "minLength": 1 },
-    "street_address": { "type": "string" },
-    "municipality": { "type": "string" },
-    "region": { "type": "string" },
-    "country": { "type": "string" },
-    "checkin_date": { "type": "string", "format": "date" },
-    "checkout_date": { "type": "string", "format": "date" },
-    "guests": { "type": "integer", "minimum": 1 },
-    "payment_gateway": { "type": "string" },
-    "contact": {
-      "type": "object",
-      "properties": {
-        "phone": { "type": "string" },
-        "email": { "type": "string", "format": "email" }
-      },
-      "required": ["phone", "email"]
+    "guest_name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100
     },
-    "valid_id": {
-      "type": "object",
-      "properties": {
-        "type": { "type": "string" },
-        "number": { "type": "string" }
-      }
+    "email": {
+      "type": "string",
+      "format": "email"
     },
-    "created_at": { "type": "string", "format": "date-time" },
-    "updated_at": { "type": "string", "format": "date-time" }
+    "phone": {
+      "type": "string",
+      "pattern": "^$|^09[0-9]{9}$",
+      "description": "Philippine phone number format: empty string or 11 digits starting with 09"
+    },
+    "street_address": {
+      "type": "string",
+      "maxLength": 200
+    },
+    "municipality": {
+      "type": "string",
+      "maxLength": 100
+    },
+    "region": {
+      "type": "string",
+      "maxLength": 100
+    },
+    "country": {
+      "type": "string",
+      "maxLength": 100
+    },
+    "resort_name": {
+      "type": "string",
+      "enum": [
+        "Arcadia Beach Resort",
+        "Kuya Boy Beach Resort",
+        "Blue Horizon Resort",
+        "White Sand Paradise",
+        "Mountain View Villa"
+      ],
+      "description": "Must be one of the approved resort names"
+    },
+    "checkin_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "checkout_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "guests": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 100
+    },
+    "payment_gateway": {
+      "oneOf": [
+        { "type": "string", "enum": [""] },
+        {
+          "type": "string",
+          "enum": [
+            "Credit Card",
+            "GCash",
+            "PayPal",
+            "Bank Transfer",
+            "BANCO DE ORO",
+            "Metrobank",
+            "BDO"
+          ]
+        }
+      ],
+      "description": "Must be empty string or one of the approved payment gateways"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time"
+    }
   },
   "required": [
     "guest_name",
@@ -45,5 +98,5 @@
     "checkout_date",
     "guests"
   ],
-  "additionalProperties": true
+  "additionalProperties": false
 }
